@@ -1,4 +1,17 @@
 //Check if window worker is supported in that browser
+
+const appendRow = (
+  csvRow: string[],
+  tableRow: HTMLTableRowElement,
+  type: "td" | "th"
+) => {
+  for (const csvItem of csvRow) {
+    const tableField = document.createElement(type);
+    tableField.textContent = csvItem;
+    tableRow.appendChild(tableField);
+  }
+};
+
 if (window.Worker) {
   const fileInput = document.getElementById("upload-file");
 
@@ -21,4 +34,19 @@ if (window.Worker) {
 
     reader.readAsText(file);
   });
+
+  parseCsvWorker.onmessage = (event: { data: string[][] }) => {
+    const table = document.createElement("table");
+    for (const [index, csv] of event.data.entries()) {
+      const tr = document.createElement("tr");
+      if (index === 0) {
+        appendRow(csv, tr, "th");
+      } else {
+        appendRow(csv, tr, "td");
+      }
+
+      table.appendChild(tr);
+    }
+    document.getElementById("table-container")?.appendChild(table);
+  };
 }
