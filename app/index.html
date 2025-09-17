@@ -9,10 +9,18 @@
   </head>
   <body>
     <h1>Online CSV Viewer</h1>
-    <div class="upload-file-container">
-      <label for="uploadFile">Upload your CSV please</label>
-      <input type="file" id="upload-file" accept=".csv" name="uploadFile" />
+    <div class="main-container">
+      <label for="upload-file" class="upload-file-btn">
+        Upload your CSV please
+      </label>
+      <input
+        type="file"
+        id="upload-file"
+        accept=".csv"
+        name="uploadFile"
+        hidden
+      />
+      <div id="table-container"></div>
     </div>
-    <div id="table-container"></div>
   </body>
 </html>
