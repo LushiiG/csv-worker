@@ -1,5 +1,7 @@
 //Check if window worker is supported in that browser
 
+let csvData: string[][] = [];
+
 const appendRow = (
   csvRow: string[],
   tableRow: HTMLTableRowElement,
@@ -22,7 +24,7 @@ if (window.Worker) {
   fileInput?.addEventListener("change", (e) => {
     //@ts-ignore
     const file = e?.target?.files[0] as Blob;
-
+    // console.log(e?.target?.files[0]);
     if (!file) return;
     //Add here a feedback
 
@@ -36,17 +38,17 @@ if (window.Worker) {
   });
 
   parseCsvWorker.onmessage = (event: { data: string[][] }) => {
-    const table = document.createElement("table");
+    console.log(event.data, "event.data");
+    const table = document.getElementById("table");
     for (const [index, csv] of event.data.entries()) {
       const tr = document.createElement("tr");
-      if (index === 0) {
+      if (index === 0 && csvData.length === 0) {
         appendRow(csv, tr, "th");
       } else {
         appendRow(csv, tr, "td");
       }
-
-      table.appendChild(tr);
+      table?.appendChild(tr);
     }
-    document.getElementById("table-container")?.appendChild(table);
+    csvData = [...csvData, ...event.data];
   };
 }

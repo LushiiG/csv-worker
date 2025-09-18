@@ -34,10 +34,12 @@ const parseCSVLine = (line: string): string[] => {
 onmessage = (event: Event) => {
   const csv = event.data.split("\n");
 
-  const csvMapped: string[][] = [];
-  for (const csvRecord of csv) {
+  let csvMapped: string[][] = [];
+  for (const [index, csvRecord] of csv.entries()) {
     csvMapped.push(parseCSVLine(csvRecord));
+    if (csvMapped.length >= 30 || index + 1 === csv.length) {
+      postMessage(csvMapped);
+      csvMapped = [];
+    }
   }
-
-  postMessage(csvMapped);
 };
