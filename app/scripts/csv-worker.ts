@@ -38,7 +38,7 @@ onmessage = (event: Event) => {
   for (const [index, csvRecord] of csv.entries()) {
     csvMapped.push(parseCSVLine(csvRecord));
     if (csvMapped.length >= 30 || index + 1 === csv.length) {
-      postMessage(csvMapped);
+      postMessage({ csvItems: csvMapped, totalLength: csv.length });
       csvMapped = [];
     }
   }
