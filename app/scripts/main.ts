@@ -64,23 +64,14 @@ const renderRows = () => {
   updateWrapperPadding(scrollTop);
 };
 
-if (window.Worker) {
+const handleFile = (file: File) => {
   const parseCsvWorker = new Worker("../../dist/csv-worker.js", {
     type: "module",
   });
 
-  fileInput.addEventListener("change", (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const file = target.files?.[0];
-    if (!file) return;
-
-    resetState();
-    showLoadingIndicator();
-
-    const reader = new FileReader();
-    reader.onload = () => parseCsvWorker.postMessage(reader.result);
-    reader.readAsText(file);
-  });
+  const reader = new FileReader();
+  reader.onload = () => parseCsvWorker.postMessage(reader.result);
+  reader.readAsText(file);
 
   parseCsvWorker.onmessage = ({
     data,
@@ -97,7 +88,21 @@ if (window.Worker) {
       csvItemsLength = totalLength;
       renderRows();
     }
+    if (csvData.length === csvItemsLength) {
+      parseCsvWorker.terminate();
+    }
   };
+};
 
-  tableContainer.addEventListener("scroll", renderRows);
+if (window.Worker) {
+  fileInput.addEventListener("change", (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+    resetState();
+    showLoadingIndicator();
+    handleFile(file);
+  });
 }
+
+tableContainer.addEventListener("scroll", renderRows);
