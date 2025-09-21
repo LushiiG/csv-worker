@@ -55,6 +55,9 @@ h1 {
   height: 70vh;
   overflow-y: auto;
   margin-top: 20px;
+  /* display: flex;
+  align-items: center;
+  justify-content: center; */
 }
 
 table {
@@ -75,4 +78,21 @@ th {
 th {
   background-color: var(--color-black);
   color: var(--color-white);
+}
+
+.spinner {
+  width: 80px;
+  height: 80px;
+  border: 10px solid #f3f3f3; 
+  border-top: 10px solid var(--color-black); 
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

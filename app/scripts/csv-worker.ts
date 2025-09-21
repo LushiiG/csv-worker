@@ -1,7 +1,3 @@
-interface Event {
-  data: string;
-}
-
 const parseCSVLine = (line: string): string[] => {
   const chunks = line.split(",");
   const result = [];
@@ -31,7 +27,7 @@ const parseCSVLine = (line: string): string[] => {
   return result;
 };
 
-onmessage = (event: Event) => {
+onmessage = (event: { data: string }) => {
   const csv = event.data.split("\n");
 
   let csvMapped: string[][] = [];
