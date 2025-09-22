@@ -79,6 +79,11 @@ th {
   background-color: var(--color-black);
   color: var(--color-white);
 }
+.upload-section{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
 
 .spinner {
   width: 80px;

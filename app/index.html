@@ -9,20 +9,35 @@
   </head>
   <body>
     <h1>Online CSV Viewer</h1>
-    <div class="main-container">
-      <label for="upload-file" class="upload-file-btn"> Upload your CSV</label>
-      <input
-        type="file"
-        id="upload-file"
-        accept=".csv"
-        name="uploadFile"
-        hidden
-      />
-      <div id="table-container">
+    <main class="main-container">
+      <section class="upload-section">
+        <label for="upload-file" class="upload-file-btn">
+          Upload your CSV</label
+        >
+        <input
+          type="file"
+          id="upload-file"
+          accept=".csv"
+          name="uploadFile"
+          hidden
+        />
+        <label for="name">Name (4 to 8 characters):</label>
+
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          minlength="4"
+          maxlength="8"
+          size="10"
+        />
+      </section>
+      <section id="table-container">
         <div id="tableWrapper">
           <table id="table"></table>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </body>
 </html>

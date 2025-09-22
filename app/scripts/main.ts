@@ -7,9 +7,6 @@ const tableContainer = document.getElementById("table-container")!;
 const table = document.getElementById("table")!;
 const wrapperDiv = document.getElementById("tableWrapper")!;
 const fileInput = document.getElementById("upload-file")! as HTMLInputElement;
-const uploadFileButton = document.querySelector(
-  ".upload-file-btn"
-) as HTMLLabelElement;
 
 const appendRow = (
   csvRow: string[],
@@ -24,11 +21,12 @@ const appendRow = (
 };
 
 const resetState = () => {
+  const fileTitle = document.getElementById("file-title");
   csvData = [];
   csvItemsLength = 0;
   table.innerHTML = "";
+  fileTitle?.remove();
   wrapperDiv.style.padding = "0";
-  uploadFileButton.style.visibility = "hidden";
 };
 
 const showLoadingIndicator = () => {
@@ -38,29 +36,45 @@ const showLoadingIndicator = () => {
 };
 
 const updateWrapperPadding = (scrollTop: number) => {
-  const paddingTop = scrollTop > 10 ? ROW_HEIGHT + scrollTop : 0;
-  wrapperDiv.style.paddingTop = `${paddingTop}px`;
+  wrapperDiv.style.paddingTop = `${scrollTop}px`;
   wrapperDiv.style.paddingBottom = `${
-    ROW_HEIGHT * csvItemsLength - paddingTop - tableContainer.clientHeight
+    ROW_HEIGHT * csvItemsLength - scrollTop - tableContainer.clientHeight
   }px`;
 };
 
 const renderRows = () => {
   const scrollTop = tableContainer.scrollTop;
   const startNode = Math.floor(scrollTop / ROW_HEIGHT);
+
   const visibleData = csvData.slice(startNode, startNode + VISIBLE_ROWS);
 
-  table.innerHTML = "";
+  let tableHeadElement = table.querySelector("thead");
+  let tableBodyElement = table.querySelector("tbody");
+
+  if (!tableHeadElement && csvData.length > 0) {
+    tableHeadElement = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    appendRow(csvData[0]!, headerRow, "th");
+    tableHeadElement.appendChild(headerRow);
+    table.appendChild(tableHeadElement);
+  }
+
+  if (!tableBodyElement) {
+    tableBodyElement = document.createElement("tbody");
+    table.appendChild(tableBodyElement);
+  }
+
+  tableBodyElement.innerHTML = "";
   const fragment = document.createDocumentFragment();
 
   visibleData.forEach((csvRow, index) => {
+    if (startNode === 0 && index === 0) return;
     const tr = document.createElement("tr");
-    const type: "td" | "th" = startNode === 0 && index === 0 ? "th" : "td";
-    appendRow(csvRow, tr, type);
+    appendRow(csvRow, tr, "td");
     fragment.appendChild(tr);
   });
 
-  table.appendChild(fragment);
+  tableBodyElement.appendChild(fragment);
   updateWrapperPadding(scrollTop);
 };
 
@@ -82,9 +96,14 @@ const handleFile = (file: File) => {
     csvData.push(...csvItems);
 
     if (csvItemsLength === 0) {
+      const uploadSection = document.querySelector(".upload-section")!;
+      const fileTitleSection = document.createElement("p");
+      fileTitleSection.id = "file-title";
+      fileTitleSection.textContent = file.name;
+      uploadSection.appendChild(fileTitleSection);
+
       const spinner = document.querySelector(".spinner");
       spinner?.remove();
-      uploadFileButton.style.visibility = "visible";
       csvItemsLength = totalLength;
       renderRows();
     }
