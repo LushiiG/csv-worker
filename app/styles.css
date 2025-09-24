@@ -9,6 +9,9 @@
 *, *::before, *::after {
   box-sizing: border-box;
 }
+p{
+  margin: 0;
+}
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
@@ -55,9 +58,6 @@ h1 {
   height: 70vh;
   overflow-y: auto;
   margin-top: 20px;
-  /* display: flex;
-  align-items: center;
-  justify-content: center; */
 }
 
 table {
@@ -100,4 +100,15 @@ th {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+#file-title{
+  font-weight: bold;
+  font-size: 18px;
+  margin: 0;
+}
+
+#title-container{
+  display: flex;
+  flex-direction: column;
 }

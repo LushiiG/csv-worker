@@ -7,6 +7,16 @@ const tableContainer = document.getElementById("table-container")!;
 const table = document.getElementById("table")!;
 const wrapperDiv = document.getElementById("tableWrapper")!;
 const fileInput = document.getElementById("upload-file")! as HTMLInputElement;
+const uploadSection = document.querySelector(".upload-section")!;
+
+const getPercentage = (csvDataLength: number, totalLength: number) => {
+  if (totalLength === 0) return "";
+  const percentage = (csvDataLength / totalLength) * 100;
+  if (percentage < 0.01 && percentage > 0) {
+    return percentage.toExponential(2) + "%";
+  }
+  return percentage.toFixed(2) + "%";
+};
 
 const appendRow = (
   csvRow: string[],
@@ -21,11 +31,9 @@ const appendRow = (
 };
 
 const resetState = () => {
-  const fileTitle = document.getElementById("file-title");
   csvData = [];
   csvItemsLength = 0;
   table.innerHTML = "";
-  fileTitle?.remove();
   wrapperDiv.style.padding = "0";
 };
 
@@ -96,17 +104,39 @@ const handleFile = (file: File) => {
     csvData.push(...csvItems);
 
     if (csvItemsLength === 0) {
-      const uploadSection = document.querySelector(".upload-section")!;
-      const fileTitleSection = document.createElement("p");
-      fileTitleSection.id = "file-title";
-      fileTitleSection.textContent = file.name;
-      uploadSection.appendChild(fileTitleSection);
+      const documentFile = document.getElementById("file-title");
+      if (documentFile) {
+        documentFile.textContent = file.name;
+      } else {
+        const titleContainer = document.createElement("div");
+        titleContainer.id = "title-container";
 
+        const fileTitleSection = document.createElement("p");
+        fileTitleSection.id = "file-title";
+        fileTitleSection.textContent = file.name;
+        titleContainer.appendChild(fileTitleSection);
+        uploadSection.appendChild(titleContainer);
+      }
       const spinner = document.querySelector(".spinner");
       spinner?.remove();
       csvItemsLength = totalLength;
       renderRows();
     }
+    const fileTitleSection = document.getElementById("file-titsle");
+    const test = document.getElementById("title-container");
+    if (fileTitleSection) {
+      fileTitleSection.innerHTML = `Loading…${getPercentage(
+        csvData.length,
+        totalLength
+      )} You can keep scrolling while we prepare everything.`;
+    } else {
+      const fileTitleSection2 = document.createElement("p");
+
+      fileTitleSection2.id = "file-titsle";
+      fileTitleSection2.textContent = file.name;
+      test?.appendChild(fileTitleSection2);
+    }
+
     if (csvData.length === csvItemsLength) {
       parseCsvWorker.terminate();
     }
