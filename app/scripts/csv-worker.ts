@@ -1,34 +1,31 @@
 const parseCSVLine = (line: string): string[] => {
-  const chunks = line.split(",");
-  const result = [];
+  const fields: string[] = [];
   let current = "";
   let inQuotes = false;
 
-  for (let chunk of chunks) {
-    if (inQuotes) {
-      current += "," + chunk;
-      if (chunk.endsWith('"') && !chunk.endsWith('\\"')) {
-        result.push(current.slice(1, -1).replace(/\\"/g, '"'));
-        current = "";
-        inQuotes = false;
-      }
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    const nextChar = line[i + 1];
+
+    if (char === '"' && inQuotes && nextChar === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      fields.push(current.trim());
+      current = "";
     } else {
-      if (chunk.startsWith('"') && !chunk.endsWith('"')) {
-        current = chunk;
-        inQuotes = true;
-      } else if (chunk.startsWith('"') && chunk.endsWith('"')) {
-        result.push(chunk.slice(1, -1).replace(/\\"/g, '"'));
-      } else {
-        result.push(chunk);
-      }
+      current += char;
     }
   }
 
-  return result;
+  fields.push(current.trim());
+  return fields;
 };
 
 onmessage = (event: { data: string }) => {
-  const csv = event.data.split("\n");
+  const csv = event.data.split(/\r?\n/);
 
   let csvMapped: string[][] = [];
   for (const [index, csvRecord] of csv.entries()) {
