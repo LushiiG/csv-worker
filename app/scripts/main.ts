@@ -1,3 +1,4 @@
+import { getPercentage } from "./utils/getPercentage";
 let csvData: string[][] = [];
 let csvItemsLength = 0;
 const ROW_HEIGHT = 50;
@@ -8,15 +9,6 @@ const table = document.getElementById("table")!;
 const wrapperDiv = document.getElementById("tableWrapper")!;
 const fileInput = document.getElementById("uploadFile")! as HTMLInputElement;
 const uploadSection = document.querySelector(".upload-section")!;
-
-const getPercentage = (csvDataLength: number, totalLength: number) => {
-  if (totalLength === 0) return "";
-  const percentage = (csvDataLength / totalLength) * 100;
-  if (percentage < 0.01 && percentage > 0) {
-    return percentage.toExponential(2) + "%";
-  }
-  return percentage.toFixed(2) + "%";
-};
 
 const appendRow = (
   csvRow: string[],
@@ -137,7 +129,7 @@ const renderRows = () => {
 
 const handleFile = (file: File) => {
   const parseCsvWorker = new Worker(
-    new URL("./csv-worker.ts", import.meta.url),
+    new URL("./workers/csv-worker.ts", import.meta.url),
     {
       type: "module",
     }
