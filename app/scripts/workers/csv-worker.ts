@@ -26,12 +26,20 @@ const parseCSVLine = (line: string): string[] => {
 
 onmessage = (event: { data: string }) => {
   const csv = event.data.split(/\r?\n/);
+  let csvLength = csv.length;
 
   let csvMapped: string[][] = [];
   for (const [index, csvRecord] of csv.entries()) {
-    csvMapped.push(parseCSVLine(csvRecord));
-    if (csvMapped.length >= 30 || index + 1 === csv.length) {
-      postMessage({ csvItems: csvMapped, totalLength: csv.length });
+    const isLastItem = index + 1 === csv.length;
+
+    if (csvRecord.trim()) {
+      csvMapped.push(parseCSVLine(csvRecord));
+    } else {
+      csvLength -= 1;
+    }
+
+    if (csvMapped.length >= 30 || isLastItem) {
+      postMessage({ csvItems: csvMapped, totalLength: csvLength });
       csvMapped = [];
     }
   }

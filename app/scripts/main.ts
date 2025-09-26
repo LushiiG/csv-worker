@@ -155,6 +155,7 @@ const handleFile = (file: File) => {
       renderRows();
     }
 
+    csvItemsLength = totalLength;
     appendLoadingPercentage(csvData.length, csvItemsLength);
 
     if (csvData.length === csvItemsLength) {
