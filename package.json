@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "source": "./app/index.html",
   "scripts": {
-    "start": "parcel",
+    "start": "parcel --open",
     "build": "parcel build"
   },
   "repository": {
