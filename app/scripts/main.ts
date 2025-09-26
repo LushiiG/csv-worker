@@ -136,9 +136,12 @@ const renderRows = () => {
 };
 
 const handleFile = (file: File) => {
-  const parseCsvWorker = new Worker("../../dist/csv-worker.js", {
-    type: "module",
-  });
+  const parseCsvWorker = new Worker(
+    new URL("./csv-worker.ts", import.meta.url),
+    {
+      type: "module",
+    }
+  );
 
   const reader = new FileReader();
   reader.onload = () => parseCsvWorker.postMessage(reader.result);
