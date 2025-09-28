@@ -93,6 +93,12 @@ const updateWrapperPadding = (scrollTop: number) => {
 
 const renderRows = () => {
   const scrollTop = tableContainer.scrollTop;
+
+  if (
+    scrollTop !== 0 &&
+    scrollTop + tableContainer.clientHeight >= tableContainer.scrollHeight - 1
+  )
+    return;
   const startNode = Math.floor(scrollTop / ROW_HEIGHT);
 
   const visibleData = csvData.slice(startNode, startNode + VISIBLE_ROWS);
