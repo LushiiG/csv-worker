@@ -1,8 +1,13 @@
 import { getPercentage } from "./utils/getPercentage";
-let csvData: string[][] = [];
+import {
+  appendNavPagination,
+  LIMIT_OF_ITEMS_PER_PAGE,
+} from "./dom/appendNavPagination";
+import { appendTableContent } from "./dom/appendTableContent";
+let csvData: string[][][] = [];
 let csvItemsLength = 0;
-const ROW_HEIGHT = 50;
-const VISIBLE_ROWS = 25;
+let currentLength = 0;
+const currentPage = 0;
 
 const tableContainer = document.getElementById("tableContainer")!;
 const table = document.getElementById("table")!;
@@ -10,15 +15,32 @@ const wrapperDiv = document.getElementById("tableWrapper")!;
 const fileInput = document.getElementById("uploadFile")! as HTMLInputElement;
 const uploadSection = document.querySelector(".upload-section")!;
 
-const appendRow = (
-  csvRow: string[],
-  tableRow: HTMLTableRowElement,
-  type: "td" | "th"
-) => {
-  for (const csvItem of csvRow) {
-    const tableField = document.createElement(type);
-    tableField.textContent = csvItem;
-    tableRow.appendChild(tableField);
+const addToBatches = (newRows: string[][]) => {
+  currentLength += newRows.length;
+  if (csvData.length === 0) {
+    csvData.push([...newRows]);
+    return;
+  }
+
+  const lastBatchIndex = csvData.length - 1;
+  const lastBatch = csvData[lastBatchIndex] ?? [];
+
+  const currentSize = lastBatch.length;
+  const newSize = newRows.length;
+
+  if (currentSize + newSize <= LIMIT_OF_ITEMS_PER_PAGE) {
+    //Not worth it to use spread operator like this csvBatches[lastBatchIndex] = [...lastBatch, ...newRows], it slow doing copies, god damn it it was so slow
+    csvData[lastBatchIndex]!.push(...newRows);
+  } else {
+    const availableSpace = LIMIT_OF_ITEMS_PER_PAGE - currentSize;
+    const rowsForCurrent = newRows.slice(0, availableSpace);
+    const rowsForNext = newRows.slice(availableSpace);
+
+    if (availableSpace > 0) {
+      csvData[lastBatchIndex]!.push(...rowsForCurrent);
+    }
+
+    csvData.push(rowsForNext);
   }
 };
 
@@ -84,55 +106,6 @@ const showLoadingIndicator = () => {
   tableContainer.appendChild(loadingDiv);
 };
 
-const updateWrapperPadding = (scrollTop: number) => {
-  wrapperDiv.style.paddingTop = `${scrollTop}px`;
-  wrapperDiv.style.paddingBottom = `${
-    ROW_HEIGHT * csvItemsLength - scrollTop - tableContainer.clientHeight
-  }px`;
-};
-
-const renderRows = () => {
-  const scrollTop = tableContainer.scrollTop;
-
-  if (
-    scrollTop !== 0 &&
-    scrollTop + tableContainer.clientHeight >= tableContainer.scrollHeight - 1
-  )
-    return;
-  const startNode = Math.floor(scrollTop / ROW_HEIGHT);
-
-  const visibleData = csvData.slice(startNode, startNode + VISIBLE_ROWS);
-
-  let tableHeadElement = table.querySelector("thead");
-  let tableBodyElement = table.querySelector("tbody");
-
-  if (!tableHeadElement && csvData.length > 0) {
-    tableHeadElement = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    appendRow(csvData[0]!, headerRow, "th");
-    tableHeadElement.appendChild(headerRow);
-    table.appendChild(tableHeadElement);
-  }
-
-  if (!tableBodyElement) {
-    tableBodyElement = document.createElement("tbody");
-    table.appendChild(tableBodyElement);
-  }
-
-  tableBodyElement.innerHTML = "";
-  const fragment = document.createDocumentFragment();
-
-  visibleData.forEach((csvRow, index) => {
-    if (startNode === 0 && index === 0) return;
-    const tr = document.createElement("tr");
-    appendRow(csvRow, tr, "td");
-    fragment.appendChild(tr);
-  });
-
-  tableBodyElement.appendChild(fragment);
-  updateWrapperPadding(scrollTop);
-};
-
 const handleFile = (file: File) => {
   const parseCsvWorker = new Worker(
     new URL("./workers/csv-worker.ts", import.meta.url),
@@ -151,20 +124,21 @@ const handleFile = (file: File) => {
     data: { csvItems: string[][]; totalLength: number };
   }) => {
     const { csvItems, totalLength } = data;
-    csvData.push(...csvItems);
+    csvItemsLength = totalLength;
+    addToBatches(csvItems);
 
-    if (csvItemsLength === 0) {
+    const spinner = document.querySelector(".spinner");
+
+    if (spinner) {
       appendFileName(file.name);
-      const spinner = document.querySelector(".spinner");
       spinner?.remove();
-      csvItemsLength = totalLength;
-      renderRows();
+      appendTableContent(totalLength, csvData[0]!);
     }
 
-    csvItemsLength = totalLength;
-    appendLoadingPercentage(csvData.length, csvItemsLength);
+    appendLoadingPercentage(currentLength, csvItemsLength);
 
-    if (csvData.length === csvItemsLength) {
+    if (currentLength === csvItemsLength) {
+      console.log("here");
       parseCsvWorker.terminate();
     }
   };
@@ -181,4 +155,6 @@ if (window.Worker) {
   });
 }
 
-tableContainer.addEventListener("scroll", renderRows);
+tableContainer.addEventListener("scroll", () =>
+  appendTableContent(csvItemsLength, csvData[0]!)
+);

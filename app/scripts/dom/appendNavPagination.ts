@@ -1,4 +1,4 @@
-const LIMIT_OF_ITEMS_PER_TABLE = 500000;
+export const LIMIT_OF_ITEMS_PER_PAGE = 500000;
 
 export const appendNavPagination = (
   lengthOfFile: number,
@@ -6,10 +6,10 @@ export const appendNavPagination = (
 ) => {
   const mainContainer = document.querySelector(".main-container")!;
   console.log(mainContainer, "mainContainer");
-  if (lengthOfFile < LIMIT_OF_ITEMS_PER_TABLE) return;
+  if (lengthOfFile < LIMIT_OF_ITEMS_PER_PAGE) return;
   const ul = document.createElement("ul");
   ul.className = "pagination";
-  const totalPages = Math.ceil(lengthOfFile / LIMIT_OF_ITEMS_PER_TABLE);
+  const totalPages = Math.ceil(lengthOfFile / LIMIT_OF_ITEMS_PER_PAGE);
   console.log(totalPages, "totalPages");
   const prevPage = document.createElement("li");
   prevPage.innerHTML = `<li><button class="page-btn" ${
