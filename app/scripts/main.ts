@@ -7,7 +7,7 @@ import { appendTableContent } from "./dom/appendTableContent";
 let csvData: string[][][] = [];
 let csvItemsLength = 0;
 let currentLength = 0;
-const currentPage = 0;
+const pagination = { currentPage: 1 };
 
 const tableContainer = document.getElementById("tableContainer")!;
 const table = document.getElementById("table")!;
@@ -96,6 +96,7 @@ const appendLoadingPercentage = (
 const resetState = () => {
   csvData = [];
   csvItemsLength = 0;
+  currentLength = 0;
   table.innerHTML = "";
   wrapperDiv.style.padding = "0";
 };
@@ -132,13 +133,15 @@ const handleFile = (file: File) => {
     if (spinner) {
       appendFileName(file.name);
       spinner?.remove();
+
       appendTableContent(totalLength, csvData[0]!);
+      appendNavPagination(totalLength, pagination, (page) => {
+        tableContainer.scrollTop = 0;
+        appendTableContent(totalLength, csvData[page] ?? []);
+      });
     }
-
     appendLoadingPercentage(currentLength, csvItemsLength);
-
     if (currentLength === csvItemsLength) {
-      console.log("here");
       parseCsvWorker.terminate();
     }
   };
@@ -156,5 +159,5 @@ if (window.Worker) {
 }
 
 tableContainer.addEventListener("scroll", () =>
-  appendTableContent(csvItemsLength, csvData[0]!)
+  appendTableContent(csvItemsLength, csvData[pagination.currentPage - 1] ?? [])
 );

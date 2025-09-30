@@ -2,48 +2,61 @@ export const LIMIT_OF_ITEMS_PER_PAGE = 500000;
 
 export const appendNavPagination = (
   lengthOfFile: number,
-  currentPage: number
+  pagination: { currentPage: number },
+  loadPage: (page: number) => void
 ) => {
   const mainContainer = document.querySelector(".main-container")!;
-  console.log(mainContainer, "mainContainer");
   if (lengthOfFile < LIMIT_OF_ITEMS_PER_PAGE) return;
+
+  const oldPagination = mainContainer.querySelector(".pagination");
+  if (oldPagination) oldPagination.remove();
+
   const ul = document.createElement("ul");
   ul.className = "pagination";
   const totalPages = Math.ceil(lengthOfFile / LIMIT_OF_ITEMS_PER_PAGE);
-  console.log(totalPages, "totalPages");
+
   const prevPage = document.createElement("li");
-  prevPage.innerHTML = `<li><button class="page-btn" ${
-    currentPage > 1 ? "" : "disabled"
-  }>Previous</button></li>`;
+  prevPage.innerHTML = `<button class="page-btn" ${
+    pagination.currentPage > 1 ? "" : "disabled"
+  }>Previous</button>`;
 
   prevPage.addEventListener("click", () => {
-    //logic here
+    if (pagination.currentPage > 1) {
+      pagination.currentPage -= 1;
+      loadPage(pagination.currentPage);
+      appendNavPagination(lengthOfFile, pagination, loadPage);
+    }
   });
-
   ul.appendChild(prevPage);
-  for (let i = 0; i < totalPages; i++) {
+
+  for (let i = 1; i <= totalPages; i++) {
     const page = document.createElement("li");
-    const pageNumber = i + 1;
-    page.innerHTML = `<li><button class="page-btn ${
-      pageNumber === currentPage ? "active" : ""
-    }" >${pageNumber}</button></li>`;
+    page.innerHTML = `<button class="page-btn ${
+      i === pagination.currentPage ? "active" : ""
+    }">${i}</button>`;
 
     page.addEventListener("click", () => {
-      console.log("other logic here");
+      pagination.currentPage = i;
+      loadPage(i - 1);
+      appendNavPagination(lengthOfFile, pagination, loadPage);
     });
 
     ul.appendChild(page);
   }
 
   const nextPage = document.createElement("li");
-  nextPage.innerHTML = `<li><button class="page-btn" ${
-    currentPage > totalPages ? "disabled" : ""
-  }>Next</button></li>`;
+  nextPage.innerHTML = `<button class="page-btn" ${
+    pagination.currentPage >= totalPages ? "disabled" : ""
+  }>Next</button>`;
 
   nextPage.addEventListener("click", () => {
-    //logic here
+    if (pagination.currentPage < totalPages) {
+      pagination.currentPage += 1;
+      loadPage(pagination.currentPage);
+      appendNavPagination(lengthOfFile, pagination, loadPage);
+    }
   });
-
   ul.appendChild(nextPage);
+
   mainContainer.append(ul);
 };

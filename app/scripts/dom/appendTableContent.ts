@@ -1,3 +1,4 @@
+import { LIMIT_OF_ITEMS_PER_PAGE } from "./appendNavPagination";
 const tableContainer = document.getElementById("tableContainer")!;
 const wrapperDiv = document.getElementById("tableWrapper")!;
 const table = document.getElementById("table")!;
@@ -75,5 +76,9 @@ export const appendTableContent = (
     startNode
   );
 
-  updateWrapperPadding(scrollTop, csvItemsLength);
+  updateWrapperPadding(
+    scrollTop,
+    //Fix this
+    csvItemsLength > LIMIT_OF_ITEMS_PER_PAGE ? csvData.length : csvItemsLength
+  );
 };
