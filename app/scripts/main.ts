@@ -1,9 +1,12 @@
-import { getPercentage } from "./utils/getPercentage";
 import {
-  appendNavPagination,
   LIMIT_OF_ITEMS_PER_PAGE,
-} from "./dom/appendNavPagination";
-import { appendTableContent } from "./dom/appendTableContent";
+  appendFileName,
+  appendLoadingPercentage,
+  appendLoadingSpinner,
+  appendNavPagination,
+  appendTableContent,
+} from "./dom";
+
 let csvData: string[][][] = [];
 let csvItemsLength = 0;
 let currentLength = 0;
@@ -13,7 +16,14 @@ const tableContainer = document.getElementById("tableContainer")!;
 const table = document.getElementById("table")!;
 const wrapperDiv = document.getElementById("tableWrapper")!;
 const fileInput = document.getElementById("uploadFile")! as HTMLInputElement;
-const uploadSection = document.querySelector(".upload-section")!;
+
+const resetState = () => {
+  csvData = [];
+  csvItemsLength = 0;
+  currentLength = 0;
+  table.innerHTML = "";
+  wrapperDiv.style.padding = "0";
+};
 
 const addToBatches = (newRows: string[][]) => {
   currentLength += newRows.length;
@@ -42,69 +52,6 @@ const addToBatches = (newRows: string[][]) => {
 
     csvData.push(rowsForNext);
   }
-};
-
-const appendFileName = (csvName: string) => {
-  const fileTitleId = "fileTitle";
-  const titleContainerId = "titleContainer";
-
-  let fileTitle = document.getElementById(fileTitleId);
-
-  if (fileTitle) {
-    fileTitle.textContent = csvName;
-    return;
-  }
-
-  if (!uploadSection) return;
-
-  const titleContainer = document.createElement("div");
-  titleContainer.id = titleContainerId;
-
-  fileTitle = document.createElement("p");
-  fileTitle.id = fileTitleId;
-  fileTitle.textContent = csvName;
-
-  titleContainer.appendChild(fileTitle);
-  uploadSection.appendChild(titleContainer);
-};
-
-const appendLoadingPercentage = (
-  currentCSVDataLength: number,
-  totalLength: number
-) => {
-  const titleContainer = document.getElementById("titleContainer");
-  if (!titleContainer) return;
-
-  const loadingPercentageId = "loadingPercentage";
-  let loadingPercentageText = document.getElementById(loadingPercentageId);
-  const loadingText = `Loading…${getPercentage(
-    currentCSVDataLength,
-    totalLength
-  )} You can keep scrolling while we prepare everything.`;
-
-  if (loadingPercentageText) {
-    loadingPercentageText.textContent = loadingText;
-  } else {
-    loadingPercentageText = document.createElement("p");
-
-    loadingPercentageText.id = loadingPercentageId;
-    loadingPercentageText.textContent = loadingText;
-    titleContainer.appendChild(loadingPercentageText);
-  }
-};
-
-const resetState = () => {
-  csvData = [];
-  csvItemsLength = 0;
-  currentLength = 0;
-  table.innerHTML = "";
-  wrapperDiv.style.padding = "0";
-};
-
-const showLoadingIndicator = () => {
-  const loadingDiv = document.createElement("div");
-  loadingDiv.className = "spinner";
-  tableContainer.appendChild(loadingDiv);
 };
 
 const handleFile = (file: File) => {
@@ -157,8 +104,12 @@ if (window.Worker) {
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
     if (!file) return;
-    resetState();
-    showLoadingIndicator();
+
+    if (csvData.length > 0) {
+      resetState();
+    }
+
+    appendLoadingSpinner();
     handleFile(file);
   });
 }
