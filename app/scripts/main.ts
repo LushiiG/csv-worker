@@ -89,7 +89,7 @@ const handleFile = (file: File) => {
       );
       appendNavPagination(totalLength, pagination, (page) => {
         tableContainer.scrollTop = 0;
-        appendTableContent(csvData[page] ?? []);
+        appendTableContent(csvData[page - 1] ?? []);
       });
     }
     appendLoadingPercentage(currentLength, csvItemsLength);
