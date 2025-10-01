@@ -134,10 +134,15 @@ const handleFile = (file: File) => {
       appendFileName(file.name);
       spinner?.remove();
 
-      appendTableContent(totalLength, csvData[0]!);
+      appendTableContent(
+        csvData[0] ?? [],
+        totalLength > LIMIT_OF_ITEMS_PER_PAGE
+          ? LIMIT_OF_ITEMS_PER_PAGE
+          : totalLength
+      );
       appendNavPagination(totalLength, pagination, (page) => {
         tableContainer.scrollTop = 0;
-        appendTableContent(totalLength, csvData[page] ?? []);
+        appendTableContent(csvData[page] ?? []);
       });
     }
     appendLoadingPercentage(currentLength, csvItemsLength);
@@ -159,5 +164,5 @@ if (window.Worker) {
 }
 
 tableContainer.addEventListener("scroll", () =>
-  appendTableContent(csvItemsLength, csvData[pagination.currentPage - 1] ?? [])
+  appendTableContent(csvData[pagination.currentPage - 1] ?? [])
 );
